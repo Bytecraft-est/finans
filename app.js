@@ -125,10 +125,10 @@ function bindLoginEvents() {
   var forgotBtn = document.getElementById('login-forgot-btn');
   if (forgotBtn) {
     forgotBtn.addEventListener('click', function() {
-      showConfirm('Şifre Sıfırla', 'Şifreniz sıfırlanacak ve giriş ekranına yönlendirileceksiniz. Verileriniz silinmez, sadece şifre kaldırılır. Devam etmek istiyor musunuz?', function() {
+      if (window.confirm('Şifreniz sıfırlanacak. Verileriniz silinmez. Devam etmek istiyor musunuz?')) {
         removePassword();
         location.reload();
-      });
+      }
     });
   }
 }
