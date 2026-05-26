@@ -1182,18 +1182,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    (function() {
-      var v = Date.now();
-      var files = ['storage.js', 'charts.js', 'app.js'];
-      function loadNext() {
-        if (!files.length) return;
-        var s = document.createElement('script');
-        s.src = files.shift() + '?v=' + v;
-        s.onload = s.onerror = loadNext;
-        document.body.appendChild(s);
-      }
-      loadNext();
-    })();
+    var _v = Date.now();
+    document.write('<script defer src="storage.js?v=' + _v + '"><\/script>');
+    document.write('<script defer src="charts.js?v=' + _v + '"><\/script>');
+    document.write('<script defer src="app.js?v=' + _v + '"><\/script>');
   </script>
 </body>
 </html>

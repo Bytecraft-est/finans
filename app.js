@@ -786,10 +786,9 @@ function bindChartsNav() {
 
 // -------- Init --------
 
-bindConfirmEvents();
-
 document.addEventListener('DOMContentLoaded', function() {
   try {
+    bindConfirmEvents();
     initAuth();
     bindLoginEvents();
   } catch (e) {
