@@ -59,7 +59,10 @@ function bindLoginEvents() {
     errEl.textContent = '';
     setPassword(pw);
     document.getElementById('login-screen').classList.add('hidden');
-    if (!appInitialized) { initApp(); appInitialized = true; }
+    if (!appInitialized) {
+      try { initApp(); } catch (e) {}
+      appInitialized = true;
+    }
   });
 
   document.getElementById('login-unlock-btn').addEventListener('click', function() {
@@ -72,8 +75,12 @@ function bindLoginEvents() {
     if (checkPassword(pw)) {
       errEl.textContent = '';
       document.getElementById('login-screen').classList.add('hidden');
-      if (!appInitialized) { initApp(); appInitialized = true; }
-      else { startIdleMonitoring(); }
+      if (!appInitialized) {
+        try { initApp(); } catch (e) {}
+        appInitialized = true;
+      } else {
+        startIdleMonitoring();
+      }
     } else {
       errEl.textContent = 'Hatalı şifre';
     }
@@ -156,19 +163,29 @@ function renderNotes() {
 }
 
 function bindNoteEvents() {
-  document.getElementById('noteAddBtn').addEventListener('click', function() {
-    const input = document.getElementById('noteInput');
-    const text = input.value.trim();
+  var addBtn = document.getElementById('noteAddBtn');
+  var input = document.getElementById('noteInput');
+  var list = document.getElementById('notesList');
+
+  if (!addBtn || !input || !list) {
+    setTimeout(bindNoteEvents, 100);
+    return;
+  }
+
+  addBtn.addEventListener('click', function() {
+    var text = input.value.trim();
     if (!text) return;
     saveNote(text);
     input.value = '';
     renderNotes();
   });
-  document.getElementById('noteInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('noteAddBtn').click();
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addBtn.click();
   });
-  document.getElementById('notesList').addEventListener('click', function(e) {
-    const btn = e.target.closest('.note-delete');
+
+  list.addEventListener('click', function(e) {
+    var btn = e.target.closest('.note-delete');
     if (btn) {
       deleteNote(btn.dataset.id);
       renderNotes();
@@ -667,7 +684,18 @@ function toggleTheme() {
 }
 
 function bindExportClear() {
-  document.getElementById('backupBtn').addEventListener('click', function() {
+  var backupBtn = document.getElementById('backupBtn');
+  var restoreBtn = document.getElementById('restoreBtn');
+  var restoreInput = document.getElementById('restoreInput');
+  var lockBtn = document.getElementById('lockBtn');
+  var clearBtn = document.getElementById('clearBtn');
+
+  if (!backupBtn || !restoreBtn || !restoreInput || !lockBtn || !clearBtn) {
+    setTimeout(bindExportClear, 100);
+    return;
+  }
+
+  backupBtn.addEventListener('click', function() {
     const data = exportData();
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -681,11 +709,11 @@ function bindExportClear() {
     showToast('Veriler yedeklendi', 'success');
   });
 
-  document.getElementById('restoreBtn').addEventListener('click', function() {
-    document.getElementById('restoreInput').click();
+  restoreBtn.addEventListener('click', function() {
+    restoreInput.click();
   });
 
-  document.getElementById('restoreInput').addEventListener('change', function(e) {
+  restoreInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -704,11 +732,11 @@ function bindExportClear() {
     e.target.value = '';
   });
 
-  document.getElementById('lockBtn').addEventListener('click', function() {
+  lockBtn.addEventListener('click', function() {
     lockApp();
   });
 
-  document.getElementById('clearBtn').addEventListener('click', function() {
+  clearBtn.addEventListener('click', function() {
     showConfirm('T\u00FCm veriyi sil', 'T\u00FCm i\u015Flemler, b\u00FCt\u00E7eler ve ayarlar silinecek! Bu i\u015Flem geri al\u0131namaz.', function() {
       clearAllData();
       refreshAll();
