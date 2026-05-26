@@ -714,6 +714,87 @@
     .quick-btn.expense-btn { color: var(--expense-color); border-color: var(--expense-bg); }
     .quick-btn.expense-btn:hover { background: var(--expense-bg); border-style: solid; }
 
+    /* Notes */
+    .notes-card { margin-top: 14px; }
+    .notes-header { margin-bottom: 12px; }
+    .notes-header h3 { font-size: 15px; font-weight: 700; }
+    .notes-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .notes-list:empty { margin-bottom: 0; }
+    .note-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      animation: fadeIn 0.2s ease;
+    }
+    .note-item .note-text {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .note-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      min-width: 32px;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .note-delete:hover { color: var(--expense-color); background: var(--expense-bg); }
+    .notes-empty {
+      text-align: center;
+      padding: 20px 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .notes-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .notes-input-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: var(--font);
+      outline: none;
+      transition: border 0.2s;
+      min-height: 40px;
+    }
+    .notes-input-row input:focus { border-color: var(--accent); }
+    .notes-input-row input::placeholder { color: var(--text-muted); }
+    .notes-input-row button {
+      padding: 10px 18px;
+      border-radius: var(--radius-xs);
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.2s;
+      min-height: 40px;
+      white-space: nowrap;
+    }
+    .notes-input-row button:active { transform: scale(0.97); }
+    .notes-input-row button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
     /* Scrollbar */
     #pages::-webkit-scrollbar { width: 4px; }
     #pages::-webkit-scrollbar-track { background: transparent; }
@@ -739,10 +820,126 @@
     .fallback-bar-item .fb-track { flex: 1; height: 18px; background: var(--progress-bg); border-radius: 4px; overflow: hidden; }
     .fallback-bar-item .fb-fill { height: 100%; border-radius: 4px; background: var(--accent); min-width: 4px; }
     .fallback-bar-item .fb-value { width: 70px; text-align: left; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+
+    /* Mask Toggle */
+    .mask-toggle {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      vertical-align: middle;
+      line-height: 1;
+      margin-left: 6px;
+      min-width: 28px;
+      min-height: 28px;
+    }
+    .mask-toggle:hover { color: var(--accent); background: var(--bg-card); }
+
+    /* Login Screen */
+    #login-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #login-screen.hidden { display: none; }
+    #login-box {
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      animation: fadeIn 0.35s ease;
+    }
+    #login-logo { font-size: 64px; margin-bottom: 8px; line-height: 1; }
+    #login-box h2 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .login-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+    .login-input-group { margin-bottom: 14px; }
+    .login-input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: var(--font);
+      outline: none;
+      transition: border 0.2s;
+    }
+    .login-input-group input:focus { border-color: var(--accent); }
+    .login-input-group input::placeholder { color: var(--text-muted); }
+    .login-error {
+      font-size: 12px;
+      color: var(--expense-color);
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-xs);
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      min-height: 48px;
+      transition: all 0.2s;
+    }
+    .login-btn:active { transform: scale(0.98); opacity: 0.9; }
+    .login-hint { font-size: 11px; color: var(--text-muted); margin-top: 16px; }
   </style>
 </head>
 <body>
-  <div id="app-wrapper">
+<div id="app-wrapper">
+    <!-- Login Screen -->
+    <div id="login-screen">
+      <div id="login-box">
+        <div id="login-logo">💰</div>
+        <h2 id="login-title">Finans Takip</h2>
+        <p class="login-subtitle" id="login-subtitle">İlk giriş için şifre belirleyin</p>
+        <div id="login-setup">
+          <div class="login-input-group">
+            <input type="password" id="setup-password" placeholder="Şifre belirleyin..." autocomplete="new-password">
+          </div>
+          <div class="login-input-group">
+            <input type="password" id="setup-password-confirm" placeholder="Şifreyi tekrarlayın..." autocomplete="new-password">
+          </div>
+          <div class="login-error" id="login-error"></div>
+          <button class="login-btn" id="login-setup-btn">Şifre Oluştur</button>
+          <p class="login-hint">Verileriniz yalnızca bu tarayıcıda saklanır.</p>
+        </div>
+        <div id="login-unlock" style="display:none;">
+          <div class="login-input-group">
+            <input type="password" id="unlock-password" placeholder="Şifrenizi girin..." autocomplete="current-password">
+          </div>
+          <div class="login-error" id="login-error-unlock"></div>
+          <button class="login-btn" id="login-unlock-btn">Giriş Yap</button>
+          <p class="login-hint">Verileriniz yalnızca bu tarayıcıda saklanır.</p>
+        </div>
+      </div>
+    </div>
     <header id="header">
       <h1>Finans Takip</h1>
       <div id="header-actions">
@@ -759,16 +956,16 @@
         </div>
         <div class="summary-grid" id="summaryGrid">
           <div class="card summary-card net-balance-card">
-            <div class="label">Net Bakiye</div>
+            <div class="label">Net Bakiye <button class="mask-toggle" id="maskToggle" aria-label="Tutarları gizle/göster">👁</button></div>
             <div class="amount" id="netBalance">₺ 0,00</div>
             <div class="sub-label">Güncel toplam</div>
           </div>
           <div class="card summary-card">
-            <div class="label">Toplam Gelir</div>
+            <div class="label">Toplam Gelir <button class="mask-toggle" id="maskToggleIncome" aria-label="Tutarları gizle/göster">👁</button></div>
             <div class="amount income" id="totalIncome">₺ 0,00</div>
           </div>
           <div class="card summary-card">
-            <div class="label">Toplam Gider</div>
+            <div class="label">Toplam Gider <button class="mask-toggle" id="maskToggleExpense" aria-label="Tutarları gizle/göster">👁</button></div>
             <div class="amount expense" id="totalExpense">₺ 0,00</div>
           </div>
         </div>
@@ -780,6 +977,16 @@
         <div class="quick-actions">
           <button class="quick-btn income-btn" data-type="income">+ Gelir Ekle</button>
           <button class="quick-btn expense-btn" data-type="expense">+ Gider Ekle</button>
+        </div>
+        <div class="card notes-card">
+          <div class="notes-header">
+            <h3>Finansal Notlar\u0131m \uD83D\uDCDD</h3>
+          </div>
+          <div id="notesList" class="notes-list"></div>
+          <div class="notes-input-row">
+            <input type="text" id="noteInput" placeholder="Notunuzu yaz\u0131n..." maxlength="200">
+            <button id="noteAddBtn">Ekle</button>
+          </div>
         </div>
       </div>
 
@@ -852,12 +1059,27 @@
           </div>
           <div class="toggle-switch active" id="themeToggleSetting"></div>
         </div>
-        <div class="setting-item" style="cursor:pointer;" id="exportBtn">
+        <div class="setting-item" style="cursor:pointer;" id="backupBtn">
           <div>
-            <div class="setting-label">Veriyi Dışa Aktar</div>
-            <div class="setting-desc">JSON dosyası olarak indir</div>
+            <div class="setting-label">Verileri Yedekle</div>
+            <div class="setting-desc">JSON dosyası olarak bilgisayara indir</div>
           </div>
           <span style="font-size:18px;color:var(--accent);">⬇</span>
+        </div>
+        <div class="setting-item" style="cursor:pointer;" id="restoreBtn">
+          <div>
+            <div class="setting-label">Yedeği Geri Yükle</div>
+            <div class="setting-desc">Yedek dosyasını seçerek verileri geri yükle</div>
+          </div>
+          <span style="font-size:18px;color:var(--accent);">⬆</span>
+        </div>
+        <input type="file" id="restoreInput" accept=".json" style="display:none;">
+        <div class="setting-item" style="cursor:pointer;" id="lockBtn">
+          <div>
+            <div class="setting-label">Uygulamayı Kilitle</div>
+            <div class="setting-desc">Şifre ekranına dön</div>
+          </div>
+          <span style="font-size:18px;color:var(--accent);">🔒</span>
         </div>
         <div class="setting-item" style="cursor:pointer;" id="clearBtn">
           <div>

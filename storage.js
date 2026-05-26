@@ -126,6 +126,7 @@ function exportData() {
   const data = {
     transactions: getTransactions(),
     budgets: getAllBudgets(),
+    notes: getNotes(),
     settings: getSettings(),
     exportedAt: new Date().toISOString()
   };
@@ -136,6 +137,83 @@ function clearAllData() {
   localStorage.removeItem('finans_transactions');
   localStorage.removeItem('finans_budgets');
   localStorage.removeItem('finans_settings');
+  localStorage.removeItem('finans_password');
+  localStorage.removeItem('finans_notes');
+}
+
+// -------- Password Auth --------
+
+function hashPassword(password) {
+  let hash = 5381;
+  for (let i = 0; i < password.length; i++) {
+    hash = ((hash << 5) + hash) + password.charCodeAt(i);
+  }
+  return 'h' + Math.abs(hash).toString(36);
+}
+
+function setPassword(password) {
+  localStorage.setItem('finans_password', hashPassword(password));
+}
+
+function checkPassword(password) {
+  const stored = localStorage.getItem('finans_password');
+  return stored && stored === hashPassword(password);
+}
+
+function hasPassword() {
+  return !!localStorage.getItem('finans_password');
+}
+
+function removePassword() {
+  localStorage.removeItem('finans_password');
+}
+
+// -------- Import --------
+
+function importData(jsonString) {
+  try {
+    const data = JSON.parse(jsonString);
+    if (!data || typeof data !== 'object') throw new Error();
+    if (data.transactions) localStorage.setItem('finans_transactions', JSON.stringify(data.transactions));
+    if (data.budgets) localStorage.setItem('finans_budgets', JSON.stringify(data.budgets));
+    if (data.notes) localStorage.setItem('finans_notes', JSON.stringify(data.notes));
+    if (data.settings) localStorage.setItem('finans_settings', JSON.stringify(data.settings));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// -------- Notes --------
+
+function generateNoteId() {
+  return 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+}
+
+function getNotes() {
+  try {
+    return JSON.parse(localStorage.getItem('finans_notes')) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveNote(text) {
+  const notes = getNotes();
+  notes.push({
+    id: generateNoteId(),
+    text: text.trim(),
+    createdAt: Date.now()
+  });
+  localStorage.setItem('finans_notes', JSON.stringify(notes));
+  return notes;
+}
+
+function deleteNote(id) {
+  let notes = getNotes();
+  notes = notes.filter(n => n.id !== id);
+  localStorage.setItem('finans_notes', JSON.stringify(notes));
+  return notes;
 }
 
 // -------- Query Helpers --------

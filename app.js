@@ -1,6 +1,9 @@
 ﻿let currentFilter = 'all';
 let currentRange = 'month';
 let confirmCallback = null;
+let appInitialized = false;
+let isAmountsMasked = false;
+let idleTimer = null;
 
 function initApp() {
   const settings = getSettings();
@@ -21,6 +24,162 @@ function initApp() {
 
   updateCharts();
   renderBudgetPage();
+  bindMaskToggle();
+  bindNoteEvents();
+  startIdleMonitoring();
+}
+
+function initAuth() {
+  if (hasPassword()) {
+    document.getElementById('login-setup').style.display = 'none';
+    document.getElementById('login-unlock').style.display = 'block';
+    document.getElementById('login-subtitle').textContent = 'Devam etmek için şifrenizi girin';
+    document.getElementById('unlock-password').focus();
+  } else {
+    document.getElementById('login-setup').style.display = 'block';
+    document.getElementById('login-unlock').style.display = 'none';
+    document.getElementById('login-subtitle').textContent = 'İlk giriş için şifre belirleyin';
+    document.getElementById('setup-password').focus();
+  }
+}
+
+function bindLoginEvents() {
+  document.getElementById('login-setup-btn').addEventListener('click', function() {
+    const pw = document.getElementById('setup-password').value;
+    const pw2 = document.getElementById('setup-password-confirm').value;
+    const errEl = document.getElementById('login-error');
+    if (!pw || pw.length < 3) {
+      errEl.textContent = 'Şifre en az 3 karakter olmalıdır';
+      return;
+    }
+    if (pw !== pw2) {
+      errEl.textContent = 'Şifreler eşleşmiyor';
+      return;
+    }
+    errEl.textContent = '';
+    setPassword(pw);
+    document.getElementById('login-screen').classList.add('hidden');
+    if (!appInitialized) { initApp(); appInitialized = true; }
+  });
+
+  document.getElementById('login-unlock-btn').addEventListener('click', function() {
+    const pw = document.getElementById('unlock-password').value;
+    const errEl = document.getElementById('login-error-unlock');
+    if (!pw) {
+      errEl.textContent = 'Lütfen şifrenizi girin';
+      return;
+    }
+    if (checkPassword(pw)) {
+      errEl.textContent = '';
+      document.getElementById('login-screen').classList.add('hidden');
+      if (!appInitialized) { initApp(); appInitialized = true; }
+      else { startIdleMonitoring(); }
+    } else {
+      errEl.textContent = 'Hatalı şifre';
+    }
+  });
+
+  document.getElementById('setup-password').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('login-setup-btn').click();
+  });
+  document.getElementById('setup-password-confirm').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('login-setup-btn').click();
+  });
+  document.getElementById('unlock-password').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('login-unlock-btn').click();
+  });
+}
+
+function lockApp() {
+  stopIdleMonitoring();
+  isAmountsMasked = false;
+  document.querySelectorAll('.mask-toggle').forEach(function(b) { b.textContent = '\uD83D\uDC41'; });
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-setup').style.display = 'none';
+  document.getElementById('login-unlock').style.display = 'block';
+  document.getElementById('login-subtitle').textContent = 'Devam etmek için şifrenizi girin';
+  document.getElementById('unlock-password').value = '';
+  document.getElementById('login-error-unlock').textContent = '';
+  document.getElementById('unlock-password').focus();
+}
+
+function startIdleMonitoring() {
+  const events = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+  events.forEach(function(evt) {
+    document.addEventListener(evt, resetIdleTimer);
+  });
+  resetIdleTimer();
+}
+
+function stopIdleMonitoring() {
+  if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+  const events = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+  events.forEach(function(evt) {
+    document.removeEventListener(evt, resetIdleTimer);
+  });
+}
+
+function resetIdleTimer() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(function() {
+    lockApp();
+  }, 300000);
+}
+
+function bindMaskToggle() {
+  document.querySelectorAll('.mask-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      isAmountsMasked = !isAmountsMasked;
+      document.querySelectorAll('.mask-toggle').forEach(function(b) {
+        b.textContent = isAmountsMasked ? '\uD83D\uDE48' : '\uD83D\uDC41';
+      });
+      renderDashboard();
+    });
+  });
+}
+
+// -------- Notes --------
+
+function renderNotes() {
+  const notes = getNotes().sort((a, b) => b.createdAt - a.createdAt);
+  const el = document.getElementById('notesList');
+  if (notes.length === 0) {
+    el.innerHTML = '<div class="notes-empty">Hen\u00FCz bir finans notu eklemediniz.</div>';
+    return;
+  }
+  el.innerHTML = notes.map(function(n) {
+    return '<div class="note-item">'
+      + '<span class="note-text">' + escapeHtml(n.text) + '</span>'
+      + '<button class="note-delete" data-id="' + n.id + '" aria-label="Notu sil">\uD83D\uDDD1\uFE0F</button>'
+      + '</div>';
+  }).join('');
+}
+
+function bindNoteEvents() {
+  document.getElementById('noteAddBtn').addEventListener('click', function() {
+    const input = document.getElementById('noteInput');
+    const text = input.value.trim();
+    if (!text) return;
+    saveNote(text);
+    input.value = '';
+    renderNotes();
+  });
+  document.getElementById('noteInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('noteAddBtn').click();
+  });
+  document.getElementById('notesList').addEventListener('click', function(e) {
+    const btn = e.target.closest('.note-delete');
+    if (btn) {
+      deleteNote(btn.dataset.id);
+      renderNotes();
+    }
+  });
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
 }
 
 function applyTheme(theme) {
@@ -206,11 +365,12 @@ function renderDashboard() {
   const expense = getTotalExpense();
   const net = getNetBalance();
 
-  document.getElementById('netBalance').textContent = formatCurrency(net);
-  document.getElementById('totalIncome').textContent = formatCurrency(income);
-  document.getElementById('totalExpense').textContent = formatCurrency(expense);
+  document.getElementById('netBalance').textContent = isAmountsMasked ? '\u2022\u2022\u2022\u2022' : formatCurrency(net);
+  document.getElementById('totalIncome').textContent = isAmountsMasked ? '\u2022\u2022\u2022\u2022' : formatCurrency(income);
+  document.getElementById('totalExpense').textContent = isAmountsMasked ? '\u2022\u2022\u2022\u2022' : formatCurrency(expense);
 
   renderRecentTransactions();
+  renderNotes();
 }
 
 function renderRecentTransactions() {
@@ -507,18 +667,45 @@ function toggleTheme() {
 }
 
 function bindExportClear() {
-  document.getElementById('exportBtn').addEventListener('click', function() {
+  document.getElementById('backupBtn').addEventListener('click', function() {
     const data = exportData();
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'finans-verisi.json';
+    a.download = 'finans-yedek-' + new Date().toISOString().split('T')[0] + '.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Veriler d\u0131\u015Fa aktar\u0131ld\u0131', 'success');
+    showToast('Veriler yedeklendi', 'success');
+  });
+
+  document.getElementById('restoreBtn').addEventListener('click', function() {
+    document.getElementById('restoreInput').click();
+  });
+
+  document.getElementById('restoreInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      showConfirm('Verileri Geri Y\u00FCkle', 'Mevcut t\u00FCm veriler yedekteki verilerle de\u011Fi\u015Fecek. Bu i\u015Flem geri al\u0131namaz. Devam etmek istiyor musunuz?', function() {
+        const success = importData(ev.target.result);
+        if (success) {
+          showToast('Veriler ba\u015Far\u0131yla geri y\u00FCklendi', 'success');
+          location.reload();
+        } else {
+          showToast('Ge\u00E7ersiz yedek dosyas\u0131', 'error');
+        }
+      });
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  document.getElementById('lockBtn').addEventListener('click', function() {
+    lockApp();
   });
 
   document.getElementById('clearBtn').addEventListener('click', function() {
@@ -547,4 +734,7 @@ function bindChartsNav() {
 
 bindConfirmEvents();
 
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', function() {
+  initAuth();
+  bindLoginEvents();
+});
