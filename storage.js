@@ -1,3 +1,28 @@
+function getStorage() {
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage !== null) {
+      localStorage.getItem('__test__');
+      return localStorage;
+    }
+  } catch(e) {}
+  return null;
+}
+
+function safeGetItem(key) {
+  var s = getStorage();
+  return s ? s.getItem(key) : null;
+}
+
+function safeSetItem(key, val) {
+  var s = getStorage();
+  if (s) s.setItem(key, val);
+}
+
+function safeRemoveItem(key) {
+  var s = getStorage();
+  if (s) s.removeItem(key);
+}
+
 function generateId() {
   return 'txn_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
 }
@@ -43,7 +68,7 @@ function getPrevMonth(monthStr) {
 
 function getTransactions() {
   try {
-    return JSON.parse(localStorage.getItem('finans_transactions')) || [];
+    return JSON.parse(safeGetItem('finans_transactions')) || [];
   } catch (e) {
     return [];
   }
@@ -61,21 +86,21 @@ function saveTransaction(obj) {
     createdAt: Date.now()
   };
   transactions.push(newTxn);
-  localStorage.setItem('finans_transactions', JSON.stringify(transactions));
+  safeSetItem('finans_transactions', JSON.stringify(transactions));
   return newTxn;
 }
 
 function deleteTransaction(id) {
   let transactions = getTransactions();
   transactions = transactions.filter(t => t.id !== id);
-  localStorage.setItem('finans_transactions', JSON.stringify(transactions));
+  safeSetItem('finans_transactions', JSON.stringify(transactions));
 }
 
 // -------- Budgets --------
 
 function getAllBudgets() {
   try {
-    return JSON.parse(localStorage.getItem('finans_budgets')) || [];
+    return JSON.parse(safeGetItem('finans_budgets')) || [];
   } catch (e) {
     return [];
   }
@@ -89,7 +114,7 @@ function setBudget(category, limit, month) {
   } else {
     budgets.push({ category, limit: parseFloat(limit), month });
   }
-  localStorage.setItem('finans_budgets', JSON.stringify(budgets));
+  safeSetItem('finans_budgets', JSON.stringify(budgets));
 }
 
 function getBudget(category, month) {
@@ -107,7 +132,7 @@ const DEFAULT_SETTINGS = {
 
 function getSettings() {
   try {
-    const data = localStorage.getItem('finans_settings');
+    const data = safeGetItem('finans_settings');
     return data ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) } : { ...DEFAULT_SETTINGS };
   } catch (e) {
     return { ...DEFAULT_SETTINGS };
@@ -117,7 +142,7 @@ function getSettings() {
 function saveSettings(obj) {
   const current = getSettings();
   const merged = { ...current, ...obj };
-  localStorage.setItem('finans_settings', JSON.stringify(merged));
+  safeSetItem('finans_settings', JSON.stringify(merged));
 }
 
 // -------- Export / Clear --------
@@ -134,11 +159,11 @@ function exportData() {
 }
 
 function clearAllData() {
-  localStorage.removeItem('finans_transactions');
-  localStorage.removeItem('finans_budgets');
-  localStorage.removeItem('finans_settings');
-  localStorage.removeItem('finans_password');
-  localStorage.removeItem('finans_notes');
+  safeRemoveItem('finans_transactions');
+  safeRemoveItem('finans_budgets');
+  safeRemoveItem('finans_settings');
+  safeRemoveItem('finans_password');
+  safeRemoveItem('finans_notes');
 }
 
 // -------- Password Auth --------
@@ -152,20 +177,20 @@ function hashPassword(password) {
 }
 
 function setPassword(password) {
-  localStorage.setItem('finans_password', hashPassword(password));
+  safeSetItem('finans_password', hashPassword(password));
 }
 
 function checkPassword(password) {
-  const stored = localStorage.getItem('finans_password');
+  const stored = safeGetItem('finans_password');
   return stored && stored === hashPassword(password);
 }
 
 function hasPassword() {
-  return !!localStorage.getItem('finans_password');
+  return !!safeGetItem('finans_password');
 }
 
 function removePassword() {
-  localStorage.removeItem('finans_password');
+  safeRemoveItem('finans_password');
 }
 
 // -------- Import --------
@@ -174,10 +199,10 @@ function importData(jsonString) {
   try {
     const data = JSON.parse(jsonString);
     if (!data || typeof data !== 'object') throw new Error();
-    if (data.transactions) localStorage.setItem('finans_transactions', JSON.stringify(data.transactions));
-    if (data.budgets) localStorage.setItem('finans_budgets', JSON.stringify(data.budgets));
-    if (data.notes) localStorage.setItem('finans_notes', JSON.stringify(data.notes));
-    if (data.settings) localStorage.setItem('finans_settings', JSON.stringify(data.settings));
+    if (data.transactions) safeSetItem('finans_transactions', JSON.stringify(data.transactions));
+    if (data.budgets) safeSetItem('finans_budgets', JSON.stringify(data.budgets));
+    if (data.notes) safeSetItem('finans_notes', JSON.stringify(data.notes));
+    if (data.settings) safeSetItem('finans_settings', JSON.stringify(data.settings));
     return true;
   } catch (e) {
     return false;
@@ -192,7 +217,7 @@ function generateNoteId() {
 
 function getNotes() {
   try {
-    return JSON.parse(localStorage.getItem('finans_notes')) || [];
+    return JSON.parse(safeGetItem('finans_notes')) || [];
   } catch (e) {
     return [];
   }
@@ -205,14 +230,14 @@ function saveNote(text) {
     text: text.trim(),
     createdAt: Date.now()
   });
-  localStorage.setItem('finans_notes', JSON.stringify(notes));
+  safeSetItem('finans_notes', JSON.stringify(notes));
   return notes;
 }
 
 function deleteNote(id) {
   let notes = getNotes();
   notes = notes.filter(n => n.id !== id);
-  localStorage.setItem('finans_notes', JSON.stringify(notes));
+  safeSetItem('finans_notes', JSON.stringify(notes));
   return notes;
 }
 
