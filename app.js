@@ -793,8 +793,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initAuth();
     bindLoginEvents();
   } catch (e) {
-    console.error('Baslatma hatasi:', e);
+    var msg = e && e.message ? e.message : String(e);
+    console.error('Baslatma hatasi:', msg);
     var loginErr = document.getElementById('login-error');
-    if (loginErr) loginErr.textContent = 'Bir hata oluştu, sayfayı yenileyin.';
+    if (loginErr) loginErr.textContent = 'Hata: ' + msg;
   }
 });
