@@ -44,11 +44,30 @@ function initAuth() {
 }
 
 function bindLoginEvents() {
-  document.getElementById('login-setup-btn').addEventListener('click', function() {
-    const pw = document.getElementById('setup-password').value;
-    const pw2 = document.getElementById('setup-password-confirm').value;
-    const errEl = document.getElementById('login-error');
-    if (!pw || pw.length < 3) {
+  var setupBtn = document.getElementById('login-setup-btn');
+  var unlockBtn = document.getElementById('login-unlock-btn');
+  var setupPw = document.getElementById('setup-password');
+  var setupPw2 = document.getElementById('setup-password-confirm');
+  var unlockPw = document.getElementById('unlock-password');
+  var errEl = document.getElementById('login-error');
+  var errUnlock = document.getElementById('login-error-unlock');
+
+  if (!setupBtn || !unlockBtn || !setupPw || !setupPw2 || !unlockPw || !errEl || !errUnlock) {
+    setTimeout(bindLoginEvents, 100);
+    return;
+  }
+
+  errEl.textContent = '';
+  errUnlock.textContent = '';
+
+  setupBtn.addEventListener('click', function() {
+    var pw = setupPw.value;
+    var pw2 = setupPw2.value;
+    if (!pw) {
+      errEl.textContent = 'Lütfen bir şifre girin';
+      return;
+    }
+    if (pw.length < 3) {
       errEl.textContent = 'Şifre en az 3 karakter olmalıdır';
       return;
     }
@@ -57,43 +76,50 @@ function bindLoginEvents() {
       return;
     }
     errEl.textContent = '';
-    setPassword(pw);
-    document.getElementById('login-screen').classList.add('hidden');
-    if (!appInitialized) {
-      try { initApp(); } catch (e) {}
-      appInitialized = true;
-    }
-  });
-
-  document.getElementById('login-unlock-btn').addEventListener('click', function() {
-    const pw = document.getElementById('unlock-password').value;
-    const errEl = document.getElementById('login-error-unlock');
-    if (!pw) {
-      errEl.textContent = 'Lütfen şifrenizi girin';
-      return;
-    }
-    if (checkPassword(pw)) {
-      errEl.textContent = '';
+    try {
+      setPassword(pw);
       document.getElementById('login-screen').classList.add('hidden');
       if (!appInitialized) {
-        try { initApp(); } catch (e) {}
+        try { initApp(); } catch (e) { console.error('initApp hatasi:', e); }
         appInitialized = true;
-      } else {
-        startIdleMonitoring();
       }
-    } else {
-      errEl.textContent = 'Hatalı şifre';
+    } catch (e) {
+      errEl.textContent = 'Kayıt hatası: ' + e.message;
     }
   });
 
-  document.getElementById('setup-password').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('login-setup-btn').click();
+  unlockBtn.addEventListener('click', function() {
+    var pw = unlockPw.value;
+    if (!pw) {
+      errUnlock.textContent = 'Lütfen şifrenizi girin';
+      return;
+    }
+    try {
+      if (checkPassword(pw)) {
+        errUnlock.textContent = '';
+        document.getElementById('login-screen').classList.add('hidden');
+        if (!appInitialized) {
+          try { initApp(); } catch (e) { console.error('initApp hatasi:', e); }
+          appInitialized = true;
+        } else {
+          startIdleMonitoring();
+        }
+      } else {
+        errUnlock.textContent = 'Hatalı şifre';
+      }
+    } catch (e) {
+      errUnlock.textContent = 'Giriş hatası: ' + e.message;
+    }
   });
-  document.getElementById('setup-password-confirm').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('login-setup-btn').click();
+
+  setupPw.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') setupBtn.click();
   });
-  document.getElementById('unlock-password').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('login-unlock-btn').click();
+  setupPw2.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') setupBtn.click();
+  });
+  unlockPw.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') unlockBtn.click();
   });
 }
 
@@ -763,6 +789,12 @@ function bindChartsNav() {
 bindConfirmEvents();
 
 document.addEventListener('DOMContentLoaded', function() {
-  initAuth();
-  bindLoginEvents();
+  try {
+    initAuth();
+    bindLoginEvents();
+  } catch (e) {
+    console.error('Baslatma hatasi:', e);
+    var loginErr = document.getElementById('login-error');
+    if (loginErr) loginErr.textContent = 'Bir hata oluştu, sayfayı yenileyin.';
+  }
 });
