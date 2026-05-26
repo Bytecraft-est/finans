@@ -6,6 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Finans Takip</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1178,8 +1181,19 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="storage.js"></script>
-  <script src="charts.js"></script>
-  <script src="app.js"></script>
+  <script>
+    (function() {
+      var v = Date.now();
+      var files = ['storage.js', 'charts.js', 'app.js'];
+      function loadNext() {
+        if (!files.length) return;
+        var s = document.createElement('script');
+        s.src = files.shift() + '?v=' + v;
+        s.onload = s.onerror = loadNext;
+        document.body.appendChild(s);
+      }
+      loadNext();
+    })();
+  </script>
 </body>
 </html>
