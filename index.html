@@ -912,6 +912,19 @@
       transition: all 0.2s;
     }
     .login-btn:active { transform: scale(0.98); opacity: 0.9; }
+    .login-forgot-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: var(--font);
+      cursor: pointer;
+      margin-top: 10px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .login-forgot-btn:hover { color: var(--accent); background: var(--bg-card); }
     .login-hint { font-size: 11px; color: var(--text-muted); margin-top: 16px; }
   </style>
 </head>
@@ -940,6 +953,7 @@
           </div>
           <div class="login-error" id="login-error-unlock"></div>
           <button class="login-btn" id="login-unlock-btn">Giriş Yap</button>
+          <button class="login-forgot-btn" id="login-forgot-btn">Şifremi Unuttum</button>
           <p class="login-hint">Verileriniz yalnızca bu tarayıcıda saklanır.</p>
         </div>
       </div>

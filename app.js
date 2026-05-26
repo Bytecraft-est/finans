@@ -121,6 +121,16 @@ function bindLoginEvents() {
   unlockPw.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') unlockBtn.click();
   });
+
+  var forgotBtn = document.getElementById('login-forgot-btn');
+  if (forgotBtn) {
+    forgotBtn.addEventListener('click', function() {
+      showConfirm('Şifre Sıfırla', 'Şifreniz sıfırlanacak ve giriş ekranına yönlendirileceksiniz. Verileriniz silinmez, sadece şifre kaldırılır. Devam etmek istiyor musunuz?', function() {
+        removePassword();
+        location.reload();
+      });
+    });
+  }
 }
 
 function lockApp() {
